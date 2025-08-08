@@ -1,5 +1,6 @@
 ---
 import { SEO } from 'astro-seo';
+import PageTransition from '../components/PageTransition.astro';
 
 export interface Props {
   title: string;
@@ -7,11 +8,14 @@ export interface Props {
   image?: string;
   canonical?: string;
   noindex?: boolean;
-  type?: 'website' | 'article';
+  type?: 'website' | 'article' | 'product' | 'profile';
   publishedTime?: string;
   modifiedTime?: string;
   author?: string;
   tags?: string[];
+  price?: string;
+  currency?: string;
+  availability?: string;
 }
 
 const { 
@@ -24,11 +28,143 @@ const {
   publishedTime,
   modifiedTime,
   author,
-  tags = []
+  tags = [],
+  price,
+  currency = 'USD',
+  availability = 'InStock'
 } = Astro.props;
 
 const canonicalURL = canonical || new URL(Astro.url.pathname, Astro.site);
 const socialImage = new URL(image, Astro.site);
+
+// Generate rich snippets based on page type
+const generateStructuredData = () => {
+  const baseData = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": `${Astro.site}#website`,
+        "url": Astro.site?.toString(),
+        "name": "Astro + Flowbite Blog",
+        "description": "Modern blog platform with Astro, Flowbite, and Tailwind CSS",
+        "potentialAction": [
+          {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": `${Astro.site}search?q={search_term_string}`
+            },
+            "query-input": "required name=search_term_string"
+          }
+        ]
+      },
+      {
+        "@type": "Organization",
+        "@id": `${Astro.site}#organization`,
+        "name": "Astro + Flowbite Blog",
+        "url": Astro.site?.toString(),
+        "logo": {
+          "@type": "ImageObject",
+          "url": new URL("/logo.png", Astro.site).toString(),
+          "width": 512,
+          "height": 512
+        },
+        "sameAs": [
+          "https://twitter.com/yourtwitterhandle",
+          "https://github.com/yourgithub",
+          "https://linkedin.com/company/yourcompany"
+        ]
+      }
+    ]
+  };
+
+  if (type === 'article') {
+    baseData["@graph"].push({
+      "@type": "Article",
+      "@id": canonicalURL.toString() + "#article",
+      "isPartOf": {
+        "@id": `${Astro.site}#website`
+      },
+      "author": {
+        "@type": "Person",
+        "name": author || "Admin",
+        "@id": `${Astro.site}#/schema/person/${(author || 'admin').toLowerCase().replace(/\s+/g, '-')}`
+      },
+      "headline": title,
+      "description": description,
+      "datePublished": publishedTime,
+      "dateModified": modifiedTime || publishedTime,
+      "mainEntityOfPage": {
+        "@id": canonicalURL.toString()
+      },
+      "publisher": {
+        "@id": `${Astro.site}#organization`
+      },
+      "image": {
+        "@type": "ImageObject",
+        "url": socialImage.toString(),
+        "width": 1200,
+        "height": 630
+      },
+      "articleSection": tags.length > 0 ? tags[0] : "General",
+      "keywords": tags.join(", "),
+      "wordCount": 1000, // You can calculate this dynamically
+      "commentCount": 0,
+      "speakable": {
+        "@type": "SpeakableSpecification",
+        "cssSelector": ["h1", "h2", "h3", ".lead"]
+      }
+    });
+
+    // Add author person schema
+    baseData["@graph"].push({
+      "@type": "Person",
+      "@id": `${Astro.site}#/schema/person/${(author || 'admin').toLowerCase().replace(/\s+/g, '-')}`,
+      "name": author || "Admin",
+      "image": {
+        "@type": "ImageObject",
+        "url": "https://flowbite.com/docs/images/people/profile-picture-2.jpg",
+        "caption": author || "Admin"
+      },
+      "description": "Passionate web developer and technical writer sharing insights about modern web technologies.",
+      "sameAs": [
+        "https://twitter.com/authorhandle",
+        "https://github.com/authorhandle"
+      ]
+    });
+  }
+
+  if (type === 'product' && price) {
+    baseData["@graph"].push({
+      "@type": "Product",
+      "@id": canonicalURL.toString() + "#product",
+      "name": title,
+      "description": description,
+      "image": socialImage.toString(),
+      "offers": {
+        "@type": "Offer",
+        "price": price,
+        "priceCurrency": currency,
+        "availability": `https://schema.org/${availability}`,
+        "url": canonicalURL.toString(),
+        "seller": {
+          "@id": `${Astro.site}#organization`
+        }
+      },
+      "brand": {
+        "@id": `${Astro.site}#organization`
+      },
+      "manufacturer": {
+        "@id": `${Astro.site}#organization`
+      }
+    });
+  }
+
+  return baseData;
+};
+
+const structuredData = generateStructuredData();
 ---
 
 <!doctype html>
@@ -49,204 +185,244 @@ const socialImage = new URL(image, Astro.site);
         optional: {
           description: description,
           siteName: "Astro + Flowbite Blog",
+          locale: "en_US",
+        },
+        image: {
+          url: socialImage.toString(),
+          width: 1200,
+          height: 630,
+          alt: title,
+          type: "image/jpeg",
         },
         article: type === 'article' ? {
           publishedTime: publishedTime,
           modifiedTime: modifiedTime,
           author: author ? [author] : undefined,
+          section: tags.length > 0 ? tags[0] : undefined,
           tags: tags,
         } : undefined,
       }}
       twitter={{
         card: "summary_large_image",
         site: "@yourtwitterhandle",
-        creator: "@yourtwitterhandle",
+        creator: author ? `@${author.toLowerCase().replace(/\s+/g, '')}` : "@yourtwitterhandle",
         title: title,
         description: description,
         image: socialImage.toString(),
+        imageAlt: title,
       }}
       extend={{
         link: [
           { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
           { rel: "sitemap", href: "/sitemap-index.xml" },
+          { rel: "alternate", type: "application/rss+xml", title: "RSS Feed", href: "/rss.xml" },
+          { rel: "preconnect", href: "https://fonts.googleapis.com" },
+          { rel: "preconnect", href: "https://fonts.gstatic.com", crossorigin: true },
+          { rel: "dns-prefetch", href: "https://api.github.com" },
         ],
         meta: [
           { name: "viewport", content: "width=device-width, initial-scale=1.0" },
           { name: "generator", content: Astro.generator },
-          { name: "theme-color", content: "#1f2937" },
+          { name: "theme-color", content: "#1f2937", media: "(prefers-color-scheme: dark)" },
+          { name: "theme-color", content: "#ffffff", media: "(prefers-color-scheme: light)" },
           { name: "msapplication-TileColor", content: "#1f2937" },
           { name: "apple-mobile-web-app-capable", content: "yes" },
           { name: "apple-mobile-web-app-status-bar-style", content: "default" },
+          { name: "apple-mobile-web-app-title", content: "Astro Blog" },
+          { name: "application-name", content: "Astro Blog" },
+          { name: "mobile-web-app-capable", content: "yes" },
+          { name: "format-detection", content: "telephone=no" },
+          { name: "color-scheme", content: "light dark" },
+          // Rich snippets meta
+          { name: "author", content: author || "Astro Blog Team" },
+          { name: "publisher", content: "Astro + Flowbite Blog" },
+          { name: "copyright", content: `© ${new Date().getFullYear()} Astro Blog. All rights reserved.` },
+          { name: "robots", content: noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
+          { name: "googlebot", content: noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" },
+          // Additional SEO meta
+          { name: "rating", content: "general" },
+          { name: "referrer", content: "no-referrer-when-downgrade" },
         ],
       }}
     />
     
     <!-- Preload critical resources -->
     <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" as="image" href={socialImage.toString()}>
     
-    <!-- JSON-LD structured data -->
-    <script type="application/ld+json" set:html={JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": type === 'article' ? 'Article' : 'WebPage',
-      "headline": title,
-      "description": description,
-      "url": canonicalURL.toString(),
-      "image": socialImage.toString(),
-      ...(type === 'article' && {
-        "datePublished": publishedTime,
-        "dateModified": modifiedTime || publishedTime,
-        "author": {
-          "@type": "Person",
-          "name": author || "Admin"
-        },
-        "publisher": {
-          "@type": "Organization",
-          "name": "Astro + Flowbite Blog",
-          "logo": {
-            "@type": "ImageObject",
-            "url": new URL("/logo.png", Astro.site).toString()
+    <!-- JSON-LD structured data for rich snippets -->
+    <script type="application/ld+json" set:html={JSON.stringify(structuredData)}></script>
+    
+    <!-- Additional rich snippets for breadcrumbs if applicable -->
+    {Astro.url.pathname !== '/' && (
+      <script type="application/ld+json" set:html={JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": Astro.site?.toString()
+          },
+          {
+            "@type": "ListItem",
+            "position": 2,
+            "name": title,
+            "item": canonicalURL.toString()
           }
-        }
-      })
-    })}></script>
+        ]
+      })}></script>
+    )}
+    
+    <!-- Performance hints -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
+    <link rel="preconnect" href="https://vitals.vercel-analytics.com">
+    
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="/manifest.json">
   </head>
   
   <body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-white">
-    <!-- Header -->
-    <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700">
-      <nav class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-        <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-          <img src="/logo.svg" class="h-8" alt="Logo" />
-          <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Blog</span>
-        </a>
-        
-        <div class="flex items-center space-x-4">
-          <!-- Dark mode toggle -->
-          <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
-            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
-            </svg>
-            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
-            </svg>
-          </button>
+    <PageTransition>
+      <!-- Skip to main content for accessibility -->
+      <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 bg-blue-600 text-white px-4 py-2 rounded-md z-50">
+        Skip to main content
+      </a>
+      
+      <!-- Header -->
+      <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md dark:bg-gray-900/80 border-b border-gray-200 dark:border-gray-700" data-animate>
+        <nav class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4" role="navigation" aria-label="Main navigation">
+          <a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
+            <img src="/logo.svg" class="h-8" alt="Blog Logo" />
+            <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Blog</span>
+          </a>
           
-          <!-- Mobile menu button -->
-          <button data-collapse-toggle="navbar-default" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-default" aria-expanded="false">
-            <span class="sr-only">Open main menu</span>
-            <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
-            </svg>
-          </button>
-        </div>
-        
-        <!-- Navigation menu -->
-        <div class="hidden w-full md:block md:w-auto" id="navbar-default">
-          <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-            <li>
-              <a href="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Home</a>
-            </li>
-            <li>
-              <a href="/blog" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Blog</a>
-            </li>
-            <li>
-              <a href="/pages" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Pages</a>
-            </li>
-            <li>
-              <a href="/about" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">About</a>
-            </li>
-            <li>
-              <a href="/contact" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Contact</a>
-            </li>
-          </ul>
-        </div>
-      </nav>
-    </header>
+          <div class="flex items-center space-x-4">
+            <!-- Dark mode toggle -->
+            <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5" aria-label="Toggle dark mode">
+              <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+              </svg>
+              <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
+              </svg>
+            </button>
+            
+            <!-- Mobile menu button -->
+            <button data-collapse-toggle="navbar-default" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-default" aria-expanded="false" aria-label="Toggle navigation menu">
+              <span class="sr-only">Open main menu</span>
+              <svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
+              </svg>
+            </button>
+          </div>
+          
+          <!-- Navigation menu -->
+          <div class="hidden w-full md:block md:w-auto" id="navbar-default">
+            <ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700" role="menubar">
+              <li role="none">
+                <a href="/" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" role="menuitem">Home</a>
+              </li>
+              <li role="none">
+                <a href="/blog" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" role="menuitem">Blog</a>
+              </li>
+              <li role="none">
+                <a href="/pages" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" role="menuitem">Pages</a>
+              </li>
+              <li role="none">
+                <a href="/about" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" role="menuitem">About</a>
+              </li>
+              <li role="none">
+                <a href="/contact" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent" role="menuitem">Contact</a>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </header>
 
-    <!-- Main content -->
-    <main class="min-h-screen">
-      <slot />
-    </main>
+      <!-- Main content -->
+      <main id="main-content" class="min-h-screen" data-animate>
+        <slot />
+      </main>
 
-    <!-- Footer -->
-    <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-      <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
-        <div class="md:flex md:justify-between">
-          <div class="mb-6 md:mb-0">
-            <a href="/" class="flex items-center">
-              <img src="/logo.svg" class="h-8 me-3" alt="Logo" />
-              <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Blog</span>
-            </a>
-            <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Building amazing experiences with Astro, Flowbite, and Tailwind CSS.</p>
+      <!-- Footer -->
+      <footer class="bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700" data-animate>
+        <div class="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
+          <div class="md:flex md:justify-between">
+            <div class="mb-6 md:mb-0">
+              <a href="/" class="flex items-center">
+                <img src="/logo.svg" class="h-8 me-3" alt="Blog Logo" />
+                <span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Blog</span>
+              </a>
+              <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">Building amazing experiences with Astro, Flowbite, and Tailwind CSS.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
+              <div>
+                <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Resources</h2>
+                <ul class="text-gray-500 dark:text-gray-400 font-medium">
+                  <li class="mb-4">
+                    <a href="/blog" class="hover:underline">Blog</a>
+                  </li>
+                  <li>
+                    <a href="/pages" class="hover:underline">Pages</a>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Follow us</h2>
+                <ul class="text-gray-500 dark:text-gray-400 font-medium">
+                  <li class="mb-4">
+                    <a href="#" class="hover:underline" rel="noopener noreferrer" target="_blank">Github</a>
+                  </li>
+                  <li>
+                    <a href="#" class="hover:underline" rel="noopener noreferrer" target="_blank">Twitter</a>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Legal</h2>
+                <ul class="text-gray-500 dark:text-gray-400 font-medium">
+                  <li class="mb-4">
+                    <a href="/privacy" class="hover:underline">Privacy Policy</a>
+                  </li>
+                  <li>
+                    <a href="/terms" class="hover:underline">Terms &amp; Conditions</a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
-          <div class="grid grid-cols-2 gap-8 sm:gap-6 sm:grid-cols-3">
-            <div>
-              <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Resources</h2>
-              <ul class="text-gray-500 dark:text-gray-400 font-medium">
-                <li class="mb-4">
-                  <a href="/blog" class="hover:underline">Blog</a>
-                </li>
-                <li>
-                  <a href="/pages" class="hover:underline">Pages</a>
-                </li>
-              </ul>
+          <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
+          <div class="sm:flex sm:items-center sm:justify-between">
+            <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© {new Date().getFullYear()} <a href="/" class="hover:underline">Astro Blog</a>. All Rights Reserved.</span>
+            <div class="flex mt-4 sm:justify-center sm:mt-0">
+              <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white" aria-label="Facebook">
+                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 8 19">
+                  <path fill-rule="evenodd" d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z" clip-rule="evenodd"/>
+                </svg>
+              </a>
+              <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5" aria-label="Discord">
+                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
+                  <path d="M16.942 1.556a16.3 16.3 0 0 0-4.126-1.3 12.04 12.04 0 0 0-.529 1.1 15.175 15.175 0 0 0-4.573 0 11.585 11.585 0 0 0-.535-1.1 16.274 16.274 0 0 0-4.129 1.3A17.392 17.392 0 0 0 .182 13.218a15.785 15.785 0 0 0 4.963 2.521c.41-.564.773-1.16 1.084-1.785a10.63 10.63 0 0 1-1.706-.83c.143-.106.283-.217.418-.33a11.664 11.664 0 0 0 10.118 0c.137.113.277.224.418.33-.544.328-1.116.606-1.71.832a12.52 12.52 0 0 0 1.084 1.785 16.46 16.46 0 0 0 5.064-2.595 17.286 17.286 0 0 0-2.973-11.59ZM6.678 10.813a1.941 1.941 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.919 1.919 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Zm6.644 0a1.94 1.94 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.918 1.918 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Z"/>
+                </svg>
+              </a>
+              <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5" aria-label="Twitter">
+                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 17">
+                  <path fill-rule="evenodd" d="M20 1.892a8.178 8.178 0 0 1-2.355.635 4.074 4.074 0 0 0 1.8-2.235 8.344 8.344 0 0 1-2.605.98A4.13 4.13 0 0 0 13.85 0a4.068 4.068 0 0 0-4.1 4.038 4 4 0 0 0 .105.919A11.705 11.705 0 0 1 1.4.734a4.006 4.006 0 0 0 1.268 5.392 4.165 4.165 0 0 1-1.859-.5v.05A4.057 4.057 0 0 0 4.1 9.635a4.19 4.19 0 0 1-1.856.07 4.108 4.108 0 0 0 3.831 2.807A8.36 8.36 0 0 1 0 14.184 11.732 11.732 0 0 0 6.291 16 11.502 11.502 0 0 0 17.964 4.5c0-.177 0-.35-.012-.523A8.143 8.143 0 0 0 20 1.892Z" clip-rule="evenodd"/>
+                </svg>
+              </a>
+              <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5" aria-label="GitHub">
+                <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.07-.6.07-.6a2.084 2.084 0 0 1 1.518 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.268-.973.63-1.325-2.2-.25-4.516-1.1-4.516-4.9A3.832 3.832 0 0 1 4.7 7.068a3.56 3.56 0 0 1 .095-2.623s.832-.266 2.726 1.016a9.409 9.409 0 0 1 4.962 0c1.89-1.282 2.717-1.016 2.717-1.016.366.83.402 1.768.1 2.623a3.827 3.827 0 0 1 1.02 2.659c0 3.807-2.319 4.644-4.525 4.889a2.366 2.366 0 0 1 .673 1.834c0 1.326-.012 2.394-.012 2.72 0 .263.18.572.681.475A9.911 9.911 0 0 0 10 .333Z" clip-rule="evenodd"/>
+                </svg>
+              </a>
             </div>
-            <div>
-              <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Follow us</h2>
-              <ul class="text-gray-500 dark:text-gray-400 font-medium">
-                <li class="mb-4">
-                  <a href="#" class="hover:underline">Github</a>
-                </li>
-                <li>
-                  <a href="#" class="hover:underline">Twitter</a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h2 class="mb-6 text-sm font-semibold text-gray-900 uppercase dark:text-white">Legal</h2>
-              <ul class="text-gray-500 dark:text-gray-400 font-medium">
-                <li class="mb-4">
-                  <a href="/privacy" class="hover:underline">Privacy Policy</a>
-                </li>
-                <li>
-                  <a href="/terms" class="hover:underline">Terms &amp; Conditions</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-        <div class="sm:flex sm:items-center sm:justify-between">
-          <span class="text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2024 <a href="/" class="hover:underline">Astro Blog</a>. All Rights Reserved.</span>
-          <div class="flex mt-4 sm:justify-center sm:mt-0">
-            <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white">
-              <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 8 19">
-                <path fill-rule="evenodd" d="M6.135 3H8V0H6.135a4.147 4.147 0 0 0-4.142 4.142V6H0v3h2v9.938h3V9h2.021l.592-3H5V3.591A.6.6 0 0 1 5.592 3h.543Z" clip-rule="evenodd"/>
-              </svg>
-              <span class="sr-only">Facebook page</span>
-            </a>
-            <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5">
-              <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 21 16">
-                <path d="M16.942 1.556a16.3 16.3 0 0 0-4.126-1.3 12.04 12.04 0 0 0-.529 1.1 15.175 15.175 0 0 0-4.573 0 11.585 11.585 0 0 0-.535-1.1 16.274 16.274 0 0 0-4.129 1.3A17.392 17.392 0 0 0 .182 13.218a15.785 15.785 0 0 0 4.963 2.521c.41-.564.773-1.16 1.084-1.785a10.63 10.63 0 0 1-1.706-.83c.143-.106.283-.217.418-.33a11.664 11.664 0 0 0 10.118 0c.137.113.277.224.418.33-.544.328-1.116.606-1.71.832a12.52 12.52 0 0 0 1.084 1.785 16.46 16.46 0 0 0 5.064-2.595 17.286 17.286 0 0 0-2.973-11.59ZM6.678 10.813a1.941 1.941 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.919 1.919 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Zm6.644 0a1.94 1.94 0 0 1-1.8-2.045 1.93 1.93 0 0 1 1.8-2.047 1.918 1.918 0 0 1 1.8 2.047 1.93 1.93 0 0 1-1.8 2.045Z"/>
-              </svg>
-              <span class="sr-only">Discord community</span>
-            </a>
-            <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5">
-              <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 17">
-                <path fill-rule="evenodd" d="M20 1.892a8.178 8.178 0 0 1-2.355.635 4.074 4.074 0 0 0 1.8-2.235 8.344 8.344 0 0 1-2.605.98A4.13 4.13 0 0 0 13.85 0a4.068 4.068 0 0 0-4.1 4.038 4 4 0 0 0 .105.919A11.705 11.705 0 0 1 1.4.734a4.006 4.006 0 0 0 1.268 5.392 4.165 4.165 0 0 1-1.859-.5v.05A4.057 4.057 0 0 0 4.1 9.635a4.19 4.19 0 0 1-1.856.07 4.108 4.108 0 0 0 3.831 2.807A8.36 8.36 0 0 1 0 14.184 11.732 11.732 0 0 0 6.291 16 11.502 11.502 0 0 0 17.964 4.5c0-.177 0-.35-.012-.523A8.143 8.143 0 0 0 20 1.892Z" clip-rule="evenodd"/>
-              </svg>
-              <span class="sr-only">Twitter page</span>
-            </a>
-            <a href="#" class="text-gray-500 hover:text-gray-900 dark:hover:text-white ms-5">
-              <svg class="w-4 h-4" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M10 .333A9.911 9.911 0 0 0 6.866 19.65c.5.092.678-.215.678-.477 0-.237-.01-1.017-.014-1.845-2.757.6-3.338-1.169-3.338-1.169a2.627 2.627 0 0 0-1.1-1.451c-.9-.615.07-.6.07-.6a2.084 2.084 0 0 1 1.518 1.021 2.11 2.11 0 0 0 2.884.823c.044-.503.268-.973.63-1.325-2.2-.25-4.516-1.1-4.516-4.9A3.832 3.832 0 0 1 4.7 7.068a3.56 3.56 0 0 1 .095-2.623s.832-.266 2.726 1.016a9.409 9.409 0 0 1 4.962 0c1.89-1.282 2.717-1.016 2.717-1.016.366.83.402 1.768.1 2.623a3.827 3.827 0 0 1 1.02 2.659c0 3.807-2.319 4.644-4.525 4.889a2.366 2.366 0 0 1 .673 1.834c0 1.326-.012 2.394-.012 2.72 0 .263.18.572.681.475A9.911 9.911 0 0 0 10 .333Z" clip-rule="evenodd"/>
-              </svg>
-              <span class="sr-only">GitHub account</span>
-            </a>
           </div>
         </div>
-      </div>
-    </footer>
+      </footer>
+    </PageTransition>
 
     <!-- Scripts -->
     <script>
@@ -291,10 +467,40 @@ const socialImage = new URL(image, Astro.site);
           }
         }
       });
+
+      // Reinitialize on page transitions
+      document.addEventListener('page:load', () => {
+        if (window.initFlowbite) {
+          window.initFlowbite();
+        }
+      });
     </script>
   </body>
 </html>
 
 <style>
   @import '../styles/global.css';
+  
+  /* Enhanced smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
+  
+  /* Focus improvements */
+  .focus\:not-sr-only:focus {
+    position: absolute;
+    width: auto;
+    height: auto;
+    padding: 0.5rem 1rem;
+    margin: 0;
+    overflow: visible;
+    clip: auto;
+    white-space: nowrap;
+  }
 </style>

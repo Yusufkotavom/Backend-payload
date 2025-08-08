@@ -1,0 +1,410 @@
+---
+// Page transition component for smooth navigation
+---
+
+<!-- Page Transition Overlay -->
+<div id="page-transition" class="fixed inset-0 z-[9999] pointer-events-none">
+  <!-- Loading Bar -->
+  <div id="loading-bar" class="absolute top-0 left-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-600 transform -translate-x-full transition-transform duration-300 ease-out" style="width: 100%;"></div>
+  
+  <!-- Loading Spinner -->
+  <div id="loading-spinner" class="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-gray-900/80 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+    <div class="relative">
+      <!-- Spinner -->
+      <div class="w-12 h-12 border-4 border-blue-200 dark:border-blue-800 border-t-blue-600 dark:border-t-blue-400 rounded-full animate-spin"></div>
+      <!-- Pulsing dot -->
+      <div class="absolute inset-0 flex items-center justify-center">
+        <div class="w-3 h-3 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Page Slide Overlay -->
+  <div id="slide-overlay" class="absolute inset-0 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 transform translate-x-full transition-transform duration-500 ease-in-out">
+    <div class="absolute inset-0 bg-black/20"></div>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <div class="text-white text-center opacity-0 transform translate-y-4 transition-all duration-300 delay-200" id="transition-text">
+        <div class="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+        <p class="text-lg font-medium">Loading...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Page Content Wrapper -->
+<div id="page-content" class="min-h-screen transition-all duration-300 ease-out">
+  <slot />
+</div>
+
+<script>
+  // Page transition functionality
+  class PageTransition {
+    constructor() {
+      this.isTransitioning = false;
+      this.loadingBar = document.getElementById('loading-bar');
+      this.loadingSpinner = document.getElementById('loading-spinner');
+      this.slideOverlay = document.getElementById('slide-overlay');
+      this.transitionText = document.getElementById('transition-text');
+      this.pageContent = document.getElementById('page-content');
+      
+      this.init();
+    }
+    
+    init() {
+      // Handle page load
+      this.handlePageLoad();
+      
+      // Handle navigation clicks
+      this.handleNavigation();
+      
+      // Handle browser back/forward
+      this.handlePopState();
+      
+      // Handle form submissions
+      this.handleForms();
+    }
+    
+    handlePageLoad() {
+      // Show page load animation
+      this.showLoadingBar();
+      
+      // Hide loading when page is ready
+      if (document.readyState === 'complete') {
+        setTimeout(() => this.hideLoading(), 100);
+      } else {
+        window.addEventListener('load', () => {
+          setTimeout(() => this.hideLoading(), 300);
+        });
+      }
+      
+      // Animate page content in
+      this.animateContentIn();
+    }
+    
+    handleNavigation() {
+      // Intercept all internal links
+      document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        
+        if (!link || this.isTransitioning) return;
+        
+        const href = link.getAttribute('href');
+        
+        // Skip external links, anchors, and special links
+        if (!href || 
+            href.startsWith('#') || 
+            href.startsWith('mailto:') || 
+            href.startsWith('tel:') ||
+            href.includes('://') ||
+            link.hasAttribute('download') ||
+            link.getAttribute('target') === '_blank') {
+          return;
+        }
+        
+        // Skip if same page
+        if (href === window.location.pathname) return;
+        
+        e.preventDefault();
+        this.navigateToPage(href);
+      });
+    }
+    
+    handlePopState() {
+      window.addEventListener('popstate', (e) => {
+        if (!this.isTransitioning) {
+          this.navigateToPage(window.location.pathname, false);
+        }
+      });
+    }
+    
+    handleForms() {
+      document.addEventListener('submit', (e) => {
+        const form = e.target;
+        if (form.method.toLowerCase() === 'get') {
+          e.preventDefault();
+          const formData = new FormData(form);
+          const params = new URLSearchParams(formData);
+          const action = form.action || window.location.pathname;
+          const url = `${action}?${params.toString()}`;
+          this.navigateToPage(url);
+        }
+      });
+    }
+    
+    async navigateToPage(url, updateHistory = true) {
+      if (this.isTransitioning) return;
+      
+      this.isTransitioning = true;
+      
+      try {
+        // Start transition animation
+        await this.startTransition();
+        
+        // Fetch new page content
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const html = await response.text();
+        const parser = new DOMParser();
+        const newDoc = parser.parseFromString(html, 'text/html');
+        
+        // Update page content
+        this.updatePageContent(newDoc);
+        
+        // Update browser history
+        if (updateHistory) {
+          history.pushState(null, '', url);
+        }
+        
+        // End transition
+        await this.endTransition();
+        
+        // Reinitialize scripts
+        this.reinitializeScripts();
+        
+      } catch (error) {
+        console.error('Navigation error:', error);
+        // Fallback to normal navigation
+        window.location.href = url;
+      } finally {
+        this.isTransitioning = false;
+      }
+    }
+    
+    async startTransition() {
+      // Animate content out
+      this.pageContent.style.opacity = '0.7';
+      this.pageContent.style.transform = 'translateY(10px) scale(0.98)';
+      
+      // Show slide overlay
+      this.slideOverlay.style.transform = 'translateX(0)';
+      
+      // Show transition text after delay
+      setTimeout(() => {
+        this.transitionText.style.opacity = '1';
+        this.transitionText.style.transform = 'translateY(0)';
+      }, 200);
+      
+      // Wait for animation
+      await this.wait(300);
+    }
+    
+    updatePageContent(newDoc) {
+      // Update title
+      document.title = newDoc.title;
+      
+      // Update meta tags
+      this.updateMetaTags(newDoc);
+      
+      // Update main content
+      const newMain = newDoc.querySelector('main') || newDoc.querySelector('#page-content');
+      const currentMain = document.querySelector('main') || this.pageContent;
+      
+      if (newMain && currentMain) {
+        currentMain.innerHTML = newMain.innerHTML;
+      }
+      
+      // Update navigation active states
+      this.updateNavigationStates();
+    }
+    
+    updateMetaTags(newDoc) {
+      // Update description
+      const newDesc = newDoc.querySelector('meta[name="description"]');
+      const currentDesc = document.querySelector('meta[name="description"]');
+      if (newDesc && currentDesc) {
+        currentDesc.setAttribute('content', newDesc.getAttribute('content'));
+      }
+      
+      // Update Open Graph tags
+      const ogTags = ['og:title', 'og:description', 'og:image', 'og:url'];
+      ogTags.forEach(tag => {
+        const newTag = newDoc.querySelector(`meta[property="${tag}"]`);
+        const currentTag = document.querySelector(`meta[property="${tag}"]`);
+        if (newTag && currentTag) {
+          currentTag.setAttribute('content', newTag.getAttribute('content'));
+        }
+      });
+    }
+    
+    updateNavigationStates() {
+      // Update active navigation links
+      const currentPath = window.location.pathname;
+      const navLinks = document.querySelectorAll('nav a');
+      
+      navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === currentPath) {
+          link.classList.add('active');
+          link.setAttribute('aria-current', 'page');
+        } else {
+          link.classList.remove('active');
+          link.removeAttribute('aria-current');
+        }
+      });
+    }
+    
+    async endTransition() {
+      // Hide slide overlay
+      this.slideOverlay.style.transform = 'translateX(100%)';
+      
+      // Hide transition text
+      this.transitionText.style.opacity = '0';
+      this.transitionText.style.transform = 'translateY(4px)';
+      
+      // Wait for slide animation
+      await this.wait(200);
+      
+      // Animate content in
+      this.pageContent.style.opacity = '1';
+      this.pageContent.style.transform = 'translateY(0) scale(1)';
+      
+      // Reset slide overlay after animation
+      setTimeout(() => {
+        this.slideOverlay.style.transform = 'translateX(100%)';
+      }, 500);
+    }
+    
+    animateContentIn() {
+      // Stagger animation for content elements
+      const elements = document.querySelectorAll('[data-animate]');
+      elements.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+          el.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, index * 100 + 200);
+      });
+    }
+    
+    showLoadingBar() {
+      this.loadingBar.style.transform = 'translateX(0)';
+      
+      // Animate loading progress
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress += Math.random() * 30;
+        if (progress > 90) progress = 90;
+        
+        this.loadingBar.style.width = `${progress}%`;
+        
+        if (progress >= 90) {
+          clearInterval(interval);
+        }
+      }, 200);
+    }
+    
+    hideLoading() {
+      // Complete loading bar
+      this.loadingBar.style.width = '100%';
+      
+      setTimeout(() => {
+        this.loadingBar.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+          this.loadingBar.style.transform = 'translateX(-100%)';
+          this.loadingBar.style.width = '0%';
+        }, 300);
+      }, 200);
+    }
+    
+    reinitializeScripts() {
+      // Reinitialize Flowbite components
+      if (window.initFlowbite) {
+        window.initFlowbite();
+      }
+      
+      // Reinitialize other scripts
+      const event = new CustomEvent('page:load');
+      document.dispatchEvent(event);
+    }
+    
+    wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+  }
+  
+  // Initialize page transitions when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      new PageTransition();
+    });
+  } else {
+    new PageTransition();
+  }
+  
+  // Expose for external use
+  window.PageTransition = PageTransition;
+</script>
+
+<style>
+  /* Smooth transitions for all elements */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  
+  /* Page content animations */
+  #page-content {
+    transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  }
+  
+  /* Loading bar gradient animation */
+  #loading-bar {
+    background: linear-gradient(90deg, 
+      #3b82f6 0%, 
+      #8b5cf6 25%, 
+      #3b82f6 50%, 
+      #8b5cf6 75%, 
+      #3b82f6 100%);
+    background-size: 200% 100%;
+    animation: gradient-shift 2s ease-in-out infinite;
+  }
+  
+  @keyframes gradient-shift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  /* Slide overlay animation */
+  #slide-overlay {
+    background: linear-gradient(135deg, 
+      #1e40af 0%, 
+      #7c3aed 35%, 
+      #1e40af 100%);
+  }
+  
+  /* Content animation classes */
+  [data-animate] {
+    transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    
+    #page-transition {
+      display: none !important;
+    }
+  }
+  
+  /* Focus management during transitions */
+  .transitioning * {
+    pointer-events: none;
+  }
+  
+  /* Accessibility improvements */
+  @media (prefers-reduced-motion: no-preference) {
+    .smooth-scroll {
+      scroll-behavior: smooth;
+    }
+  }
+</style>
