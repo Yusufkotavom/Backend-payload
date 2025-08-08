@@ -1,0 +1,32 @@
+---
+import '../../styles/tailwind.css'
+import { fetchPayload } from '../../lib/payload'
+
+const page = Number(Astro.params.page || '1')
+const limit = 5
+const skip = (page - 1) * limit
+const data = await fetchPayload<{ docs: any[], totalDocs: number }>(`api/posts?limit=${limit}&page=${page}`)
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Posts page {page}</title>
+  </head>
+  <body class="min-h-screen bg-white text-gray-900">
+    <main class="max-w-4xl mx-auto p-6">
+      <h1 class="text-3xl font-bold mb-6">Posts - Page {page}</h1>
+      <ul class="space-y-4">
+        {data.docs.map((p) => (
+          <li class="p-4 border rounded">
+            <a href={`/${p.slug}`} class="text-blue-600 hover:underline">{p.title}</a>
+          </li>
+        ))}
+      </ul>
+      <div class="mt-6 flex gap-4">
+        {page > 1 && <a class="text-blue-600" href={`/page/${page-1}`}>Prev</a>}
+        <a class="text-blue-600" href={`/page/${page+1}`}>Next</a>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,4 @@
+[
+  { "slug": "hello-world", "title": "Hello World", "excerpt": "First local post", "content": "This is a local Astro post." },
+  { "slug": "second-post", "title": "Second Post", "excerpt": "Another local post", "content": "Content of the second post." }
+]

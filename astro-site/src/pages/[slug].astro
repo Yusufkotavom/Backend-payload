@@ -1,0 +1,36 @@
+---
+import '../styles/tailwind.css'
+import { fetchPayload } from '../lib/payload'
+
+const { slug } = Astro.params
+
+let doc = null
+try {
+  doc = await fetchPayload<any>(`api/pages?where[slug][equals]=${slug}`)
+  if (doc?.docs?.length === 0) {
+    doc = await fetchPayload<any>(`api/posts?where[slug][equals]=${slug}`)
+  }
+} catch (e) {}
+const item = doc?.docs?.[0]
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{item?.title || 'Not found'}</title>
+  </head>
+  <body class="min-h-screen bg-white text-gray-900">
+    <main class="max-w-3xl mx-auto p-6">
+      {item ? (
+        <article>
+          <h1 class="text-4xl font-bold mb-4">{item.title}</h1>
+          {item.heroImage && <img src={item.heroImage?.url} alt={item.title} class="mb-6 rounded" />}
+          {/* Render rich content client-side or simplify here */}
+          {item.content && <pre class="bg-gray-100 p-4 rounded text-sm overflow-x-auto">{JSON.stringify(item.content, null, 2)}</pre>}
+        </article>
+      ) : (
+        <p>Not found.</p>
+      )}
+    </main>
+  </body>
+</html>

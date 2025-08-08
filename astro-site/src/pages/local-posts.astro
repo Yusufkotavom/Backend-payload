@@ -1,0 +1,24 @@
+---
+import '../styles/tailwind.css'
+import posts from '../data/sample/posts.json'
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Local Posts</title>
+  </head>
+  <body class="min-h-screen bg-white text-gray-900">
+    <main class="max-w-4xl mx-auto p-6">
+      <h1 class="text-3xl font-bold mb-6">Local Posts (Astro)</h1>
+      <ul class="space-y-4">
+        {posts.map((p) => (
+          <li class="p-4 border rounded">
+            <div class="font-semibold">{p.title}</div>
+            <p class="text-sm text-gray-600">{p.excerpt}</p>
+          </li>
+        ))}
+      </ul>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+---
+import '../styles/tailwind.css'
+import { fetchPayload } from '../lib/payload'
+
+const data = await fetchPayload<{ docs: any[] }>('api/posts?limit=10')
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Posts</title>
+  </head>
+  <body class="min-h-screen bg-white text-gray-900">
+    <main class="max-w-4xl mx-auto p-6">
+      <h1 class="text-3xl font-bold mb-6">Posts</h1>
+      <ul class="space-y-4">
+        {data.docs.map((p) => (
+          <li class="p-4 border rounded">
+            <a href={`/${p.slug}`} class="text-blue-600 hover:underline">{p.title}</a>
+          </li>
+        ))}
+      </ul>
+    </main>
+  </body>
+</html>

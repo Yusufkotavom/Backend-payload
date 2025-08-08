@@ -1,0 +1,32 @@
+---
+import '../../styles/tailwind.css'
+import { fetchPayload } from '../../lib/payload'
+
+const { slug } = Astro.params
+const data = await fetchPayload<any>(`api/products?where[slug][equals]=${slug}`)
+const product = data?.docs?.[0]
+---
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{product?.title || 'Product'}</title>
+  </head>
+  <body class="min-h-screen bg-white text-gray-900">
+    <main class="max-w-3xl mx-auto p-6">
+      {product ? (
+        <article>
+          <h1 class="text-4xl font-bold mb-4">{product.title}</h1>
+          {product.image?.url && <img src={product.image.url} alt={product.title} class="mb-6 rounded" />}
+          {product.description && <p class="mb-4">{product.description}</p>}
+          {product.price && <div class="text-xl font-semibold mb-4">${product.price}</div>}
+          {product.affiliateUrl && (
+            <a href={product.affiliateUrl} class="inline-flex px-4 py-2 rounded bg-blue-600 text-white">Buy</a>
+          )}
+        </article>
+      ) : (
+        <p>Not found.</p>
+      )}
+    </main>
+  </body>
+</html>
