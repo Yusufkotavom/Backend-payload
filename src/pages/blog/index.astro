@@ -1,0 +1,318 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+// Get manual blog posts
+const manualPosts = await getCollection('manual-blog', ({ data }) => {
+  return !data.draft;
+});
+
+// Get Notion blog posts (will be empty if no Notion setup)
+let notionPosts = [];
+try {
+  notionPosts = await getCollection('notion-blog');
+} catch (error) {
+  console.log('Notion blog collection not available:', error.message);
+}
+
+// Combine and sort all posts by date
+const allPosts = [
+  ...manualPosts.map(post => ({
+    ...post,
+    type: 'manual',
+    date: post.data.pubDate,
+    url: `/blog/${post.slug}/`
+  })),
+  ...notionPosts.map(post => ({
+    ...post,
+    type: 'notion',
+    date: post.data.date,
+    url: `/blog/notion/${post.slug}/`
+  }))
+].sort((a, b) => b.date.valueOf() - a.date.valueOf());
+
+// Get featured posts
+const featuredPosts = allPosts.filter(post => 
+  post.type === 'manual' ? post.data.featured : post.data.featured
+);
+
+// Get recent posts (excluding featured)
+const recentPosts = allPosts.filter(post => 
+  !(post.type === 'manual' ? post.data.featured : post.data.featured)
+).slice(0, 6);
+---
+
+<BaseLayout 
+  title="Blog - Astro + Flowbite + Tailwind"
+  description="Discover the latest articles about web development, Astro, Flowbite, and modern web technologies. Learn from tutorials, guides, and best practices."
+  type="website"
+>
+  <!-- Hero Section -->
+  <section class="bg-white dark:bg-gray-900">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
+      <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
+        Our Blog
+      </h1>
+      <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 dark:text-gray-400">
+        Discover the latest insights, tutorials, and best practices in web development, Astro, Flowbite, and modern web technologies.
+      </p>
+      
+      <!-- Search and Filter -->
+      <div class="flex flex-col items-center justify-center space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 mb-8">
+        <div class="relative w-full max-w-md">
+          <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+            <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+            </svg>
+          </div>
+          <input type="search" id="blog-search" class="block w-full p-3 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search articles..." required>
+        </div>
+        <button id="filter-dropdown-button" data-dropdown-toggle="filter-dropdown" class="text-gray-900 border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700" type="button">
+          Filter by category
+          <svg class="w-2.5 h-2.5 ms-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 4 4 4-4"/>
+          </svg>
+        </button>
+        <!-- Dropdown menu -->
+        <div id="filter-dropdown" class="z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700">
+          <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="filter-dropdown-button">
+            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">All Categories</a></li>
+            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Astro</a></li>
+            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Flowbite</a></li>
+            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Tailwind CSS</a></li>
+            <li><a href="#" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Web Development</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {featuredPosts.length > 0 && (
+    <!-- Featured Articles Section -->
+    <section class="bg-gray-50 dark:bg-gray-800">
+      <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16">
+        <div class="mb-8">
+          <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-4">Featured Articles</h2>
+          <p class="text-gray-500 dark:text-gray-400">Don't miss these highlighted posts from our editorial team.</p>
+        </div>
+        
+        <div class="grid gap-8 lg:grid-cols-2">
+          {featuredPosts.slice(0, 2).map((post) => (
+            <article class="p-6 bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700">
+              <div class="flex justify-between items-center mb-5 text-gray-500">
+                <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
+                  <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M2 5a2 2 0 012-2h8a2 2 0 012 2v10a2 2 0 002 2H4a2 2 0 01-2-2V5zm3 1h6v4H5V6zm6 6H5v2h6v-2z" clip-rule="evenodd"></path>
+                  </svg>
+                  {post.type === 'manual' ? 'Article' : 'From Notion'}
+                </span>
+                <span class="text-sm">
+                  {post.date.toLocaleDateString('en-US', { 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </span>
+              </div>
+              <h2 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                <a href={post.url} class="hover:underline">{post.data.title}</a>
+              </h2>
+              <p class="mb-5 font-light text-gray-500 dark:text-gray-400">
+                {post.data.description}
+              </p>
+              <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                  <img class="w-7 h-7 rounded-full" src="https://flowbite.s3.amazonaws.com/blocks/marketing/avatars/jese-leos.png" alt={post.data.author || 'Author'} />
+                  <span class="font-medium text-gray-900 dark:text-white">
+                    {post.data.author || 'Admin'}
+                  </span>
+                </div>
+                <a href={post.url} class="inline-flex items-center font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                  Read more
+                  <svg class="ml-2 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- All Articles Section -->
+  <section class="bg-white dark:bg-gray-900">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16">
+      <div class="mb-8">
+        <h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-4">
+          {featuredPosts.length > 0 ? 'Latest Articles' : 'All Articles'}
+        </h2>
+        <p class="text-gray-500 dark:text-gray-400">
+          Explore our collection of tutorials, guides, and insights.
+        </p>
+      </div>
+
+      {allPosts.length === 0 ? (
+        <!-- Empty State -->
+        <div class="flex flex-col items-center justify-center py-16">
+          <svg class="w-16 h-16 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No articles yet</h3>
+          <p class="text-gray-500 dark:text-gray-400 text-center mb-6">
+            We're working on creating amazing content for you. Check back soon!
+          </p>
+          <div class="flex flex-col sm:flex-row gap-4">
+            <a href="/" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+              Back to Home
+            </a>
+            <a href="/contact" class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700">
+              Contact Us
+            </a>
+          </div>
+        </div>
+      ) : (
+        <!-- Articles Grid -->
+        <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {(featuredPosts.length > 0 ? recentPosts : allPosts).map((post) => (
+            <article class="p-6 bg-white rounded-lg border border-gray-200 shadow-md dark:bg-gray-800 dark:border-gray-700 hover:shadow-lg transition-shadow duration-300">
+              {post.data.heroImage && (
+                <div class="mb-5">
+                  <img src={post.data.heroImage} alt={post.data.title} class="w-full h-48 object-cover rounded-lg" />
+                </div>
+              )}
+              
+              <div class="flex justify-between items-center mb-5 text-gray-500">
+                <div class="flex items-center space-x-2">
+                  <span class="bg-blue-100 text-blue-800 text-xs font-medium inline-flex items-center px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
+                    <svg class="mr-1 w-3 h-3" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z"></path>
+                    </svg>
+                    {post.type === 'manual' ? 'Manual' : 'Notion'}
+                  </span>
+                  {post.data.tags && post.data.tags.length > 0 && (
+                    <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">
+                      {post.data.tags[0]}
+                    </span>
+                  )}
+                </div>
+                <span class="text-sm">
+                  {post.date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric' 
+                  })}
+                </span>
+              </div>
+              
+              <h2 class="mb-2 text-xl font-bold tracking-tight text-gray-900 dark:text-white">
+                <a href={post.url} class="hover:underline">{post.data.title}</a>
+              </h2>
+              
+              <p class="mb-5 font-light text-gray-500 dark:text-gray-400 line-clamp-3">
+                {post.data.description}
+              </p>
+              
+              <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-4">
+                  <img class="w-7 h-7 rounded-full" src="https://flowbite.s3.amazonaws.com/blocks/marketing/avatars/bonnie-green.png" alt={post.data.author || 'Author'} />
+                  <span class="font-medium text-gray-900 dark:text-white text-sm">
+                    {post.data.author || 'Admin'}
+                  </span>
+                </div>
+                <a href={post.url} class="inline-flex items-center font-medium text-blue-600 dark:text-blue-500 hover:underline text-sm">
+                  Read more
+                  <svg class="ml-2 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                  </svg>
+                </a>
+              </div>
+            </article>
+          ))}
+        </div>
+
+        {/* Load More Button */}
+        {allPosts.length > 6 && (
+          <div class="text-center mt-12">
+            <button type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+              Load more articles
+            </button>
+          </div>
+        )}
+      )}
+    </div>
+  </section>
+
+  <!-- Newsletter Signup -->
+  <section class="bg-gray-50 dark:bg-gray-800">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+      <div class="mx-auto max-w-screen-md sm:text-center">
+        <h2 class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl dark:text-white">
+          Never miss an update
+        </h2>
+        <p class="mx-auto mb-8 max-w-2xl font-light text-gray-500 md:mb-12 sm:text-xl dark:text-gray-400">
+          Subscribe to our newsletter and get notified when we publish new articles and tutorials.
+        </p>
+        <form action="#" class="mx-auto max-w-screen-sm">
+          <div class="items-center mx-auto mb-3 space-y-4 max-w-screen-sm sm:flex sm:space-y-0">
+            <div class="relative w-full">
+              <label for="newsletter-email" class="hidden mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Email address</label>
+              <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                </svg>
+              </div>
+              <input class="block p-3 pl-10 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 sm:rounded-none sm:rounded-l-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your email" type="email" id="newsletter-email" required>
+            </div>
+            <div>
+              <button type="submit" class="py-3 px-5 w-full text-sm font-medium text-center text-white rounded-lg border cursor-pointer bg-blue-700 border-blue-600 sm:rounded-none sm:rounded-r-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                Subscribe
+              </button>
+            </div>
+          </div>
+          <div class="mx-auto max-w-screen-sm text-sm text-left text-gray-500 newsletter-form-footer dark:text-gray-300">
+            We care about the protection of your data. 
+            <a href="/privacy" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+              Read our Privacy Policy
+            </a>.
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Simple search functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('blog-search');
+    const articles = document.querySelectorAll('article');
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        
+        articles.forEach(article => {
+          const title = article.querySelector('h2')?.textContent?.toLowerCase() || '';
+          const description = article.querySelector('p')?.textContent?.toLowerCase() || '';
+          
+          if (title.includes(searchTerm) || description.includes(searchTerm) || searchTerm === '') {
+            article.style.display = 'block';
+          } else {
+            article.style.display = 'none';
+          }
+        });
+      });
+    }
+  });
+</script>
+
+<style>
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

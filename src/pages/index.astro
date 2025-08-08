@@ -1,181 +1,199 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
-<Layout title="Astro + Flowbite + Tailwind">
-	<main>
-		<!-- Navigation Bar -->
-		<nav class="bg-white border-gray-200 dark:bg-gray-900">
-			<div class="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-				<a href="/" class="flex items-center space-x-3 rtl:space-x-reverse">
-					<span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Astro + Flowbite</span>
-				</a>
-				<button data-collapse-toggle="navbar-default" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600" aria-controls="navbar-default" aria-expanded="false">
-					<span class="sr-only">Open main menu</span>
-					<svg class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 17 14">
-						<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 1h15M1 7h15M1 13h15"/>
-					</svg>
-				</button>
-				<div class="hidden w-full md:block md:w-auto" id="navbar-default">
-					<ul class="font-medium flex flex-col p-4 md:p-0 mt-4 border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 rtl:space-x-reverse md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
-						<li>
-							<a href="#" class="block py-2 px-3 text-white bg-blue-700 rounded md:bg-transparent md:text-blue-700 md:p-0 dark:text-white md:dark:text-blue-500" aria-current="page">Home</a>
-						</li>
-						<li>
-							<a href="#" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">About</a>
-						</li>
-						<li>
-							<a href="#" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Services</a>
-						</li>
-						<li>
-							<a href="#" class="block py-2 px-3 text-gray-900 rounded hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent">Contact</a>
-						</li>
-					</ul>
-				</div>
-			</div>
-		</nav>
+<BaseLayout 
+  title="Astro + Flowbite + Tailwind - Modern Blog Platform"
+  description="A powerful blog platform built with Astro, Flowbite components, and Tailwind CSS. Features Notion integration, SEO optimization, and beautiful responsive design."
+  type="website"
+>
+  <!-- Hero Section with CTA -->
+  <section class="bg-white dark:bg-gray-900">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12">
+      <a href="#" class="inline-flex justify-between items-center py-1 px-1 pe-4 mb-7 text-sm text-blue-700 bg-blue-100 rounded-full dark:bg-blue-900 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800">
+        <span class="text-xs bg-blue-600 rounded-full text-white px-4 py-1.5 me-3">New</span>
+        <span class="text-sm font-medium">Flowbite blocks are out! See what's new</span>
+        <svg class="w-2.5 h-2.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+        </svg>
+      </a>
+      <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">Modern Blog Platform</h1>
+      <p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 xl:px-48 dark:text-gray-400">Build fast, SEO-optimized blogs with Astro's performance, Flowbite's beautiful components, and seamless Notion integration for content management.</p>
+      <div class="flex flex-col mb-8 lg:mb-16 space-y-4 sm:flex-row sm:justify-center sm:space-y-0 sm:space-x-4">
+        <a href="/blog" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
+          Explore Blog
+          <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
+            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
+          </svg>
+        </a>
+        <a href="#features" class="inline-flex justify-center hover:text-gray-900 items-center py-3 px-5 sm:ms-4 text-base font-medium text-center text-gray-900 rounded-lg border border-gray-300 hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 dark:text-white dark:border-gray-700 dark:hover:bg-gray-700 dark:focus:ring-gray-800">
+          Learn More
+        </a>
+      </div>
+      
+      <!-- Feature showcase with icons -->
+      <div class="px-4 mx-auto text-center md:max-w-screen-md lg:max-w-screen-lg lg:px-36">
+        <span class="font-semibold text-gray-400 uppercase">POWERED BY</span>
+        <div class="flex flex-wrap justify-center items-center mt-8 text-gray-500 sm:justify-between">
+          <div class="mr-5 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400">
+            <span class="font-bold text-xl">Astro</span>
+          </div>
+          <div class="mr-5 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400">
+            <span class="font-bold text-xl">Flowbite</span>
+          </div>
+          <div class="mr-5 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400">
+            <span class="font-bold text-xl">Tailwind CSS</span>
+          </div>
+          <div class="mr-5 mb-5 lg:mb-0 hover:text-gray-800 dark:hover:text-gray-400">
+            <span class="font-bold text-xl">Notion</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-		<!-- Hero Section -->
-		<section class="bg-white dark:bg-gray-900">
-			<div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
-				<h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900 md:text-5xl lg:text-6xl dark:text-white">Astro + Flowbite + Tailwind</h1>
-				<p class="mb-8 text-lg font-normal text-gray-500 lg:text-xl sm:px-16 lg:px-48 dark:text-gray-400">Build fast, modern websites with the perfect combination of Astro's performance, Flowbite's components, and Tailwind's utility-first CSS framework.</p>
-				<div class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0">
-					<a href="#components" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-center text-white rounded-lg bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:focus:ring-blue-900">
-						Get started
-						<svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-							<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-						</svg>
-					</a>
-					<a href="#" class="py-3 px-5 sm:ms-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-						Learn more
-					</a>
-				</div>
-			</div>
-		</section>
+  <!-- Features Section -->
+  <section id="features" class="bg-gray-50 dark:bg-gray-800">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
+      <div class="max-w-screen-md mb-8 lg:mb-16">
+        <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">Designed for modern content creators</h2>
+        <p class="text-gray-500 sm:text-xl dark:text-gray-400">Here at Astro Blog we focus on markets where technology, innovation, and capital can unlock long-term value and drive economic growth.</p>
+      </div>
+      <div class="space-y-8 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-12 md:space-y-0">
+        <div>
+          <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
+            <svg class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M3 3a1 1 0 000 2v8a2 2 0 002 2h2.586l-1.293 1.293a1 1 0 101.414 1.414L10 15.414l2.293 2.293a1 1 0 001.414-1.414L12.414 15H15a2 2 0 002-2V5a1 1 0 100-2H3zm11.707 4.707a1 1 0 00-1.414-1.414L10 9.586 8.707 8.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold dark:text-white">Notion Integration</h3>
+          <p class="text-gray-500 dark:text-gray-400">Seamlessly manage your content with Notion databases. Write in Notion, publish automatically.</p>
+        </div>
+        <div>
+          <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
+            <svg class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.75 2.524 9.026 9.026 0 01-1 .23z"></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold dark:text-white">SEO Optimized</h3>
+          <p class="text-gray-500 dark:text-gray-400">Built-in SEO optimization with structured data, meta tags, and sitemap generation.</p>
+        </div>
+        <div>
+          <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
+            <svg class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v3.57A22.952 22.952 0 0110 13a22.95 22.95 0 01-8-1.43V8a2 2 0 012-2h2zm2-1a1 1 0 011-1h2a1 1 0 011 1v1H8V5zm1 5a1 1 0 011-1h.01a1 1 0 110 2H10a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+              <path d="M2 13.692V16a2 2 0 002 2h12a2 2 0 002-2v-2.308A24.974 24.974 0 0110 15c-2.796 0-5.487-.46-8-1.308z"></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold dark:text-white">Lightning Fast</h3>
+          <p class="text-gray-500 dark:text-gray-400">Built with Astro for optimal performance. Static generation with dynamic capabilities.</p>
+        </div>
+        <div>
+          <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
+            <svg class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.433 7.418c.155-.103.346-.196.567-.267v1.698a2.305 2.305 0 01-.567-.267C8.07 8.34 8 8.114 8 8c0-.114.07-.34.433-.582zM11 12.849v-1.698c.22.071.412.164.567.267.364.243.433.468.433.582 0 .114-.07.34-.433.582a2.305 2.305 0 01-.567.267z"></path>
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold dark:text-white">Flexible Content</h3>
+          <p class="text-gray-500 dark:text-gray-400">Support for both Notion-powered content and traditional markdown files.</p>
+        </div>
+        <div>
+          <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
+            <svg class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold dark:text-white">Beautiful Design</h3>
+          <p class="text-gray-500 dark:text-gray-400">Professional layouts powered by Flowbite components and Tailwind CSS.</p>
+        </div>
+        <div>
+          <div class="flex justify-center items-center mb-4 w-10 h-10 rounded-full bg-blue-100 lg:h-12 lg:w-12 dark:bg-blue-900">
+            <svg class="w-5 h-5 text-blue-600 lg:w-6 lg:h-6 dark:text-blue-300" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+              <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <h3 class="mb-2 text-xl font-bold dark:text-white">Dark Mode</h3>
+          <p class="text-gray-500 dark:text-gray-400">Built-in dark mode support with smooth transitions and user preference detection.</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-		<!-- Components Showcase -->
-		<section id="components" class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16">
-			<div class="text-center mb-8">
-				<h2 class="text-3xl font-extrabold text-gray-900 dark:text-white mb-4">Flowbite Components</h2>
-				<p class="text-gray-500 dark:text-gray-400">Here are some examples of Flowbite components working with Astro and Tailwind CSS.</p>
-			</div>
+  <!-- Testimonials Section -->
+  <section class="bg-white dark:bg-gray-900">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-6">
+      <div class="mx-auto max-w-screen-sm">
+        <h2 class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white">What developers are saying</h2>
+        <p class="mb-8 font-light text-gray-500 lg:mb-16 sm:text-xl dark:text-gray-400">Explore the whole collection of open-source web components and elements built with the utility classes from Tailwind</p>
+      </div>
+      <div class="grid mb-8 border border-gray-200 rounded-lg shadow-sm dark:border-gray-700 md:mb-12 md:grid-cols-2">
+        <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 rounded-t-lg md:rounded-t-none md:rounded-ss-lg md:border-e dark:bg-gray-800 dark:border-gray-700">
+          <blockquote class="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 dark:text-gray-400">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">"This is the perfect solution for content creators"</h3>
+            <p class="my-4">"The Notion integration makes content management incredibly smooth, and the SEO optimization is top-notch. Our blog performance improved dramatically."</p>
+          </blockquote>
+          <figcaption class="flex items-center justify-center">
+            <img class="rounded-full w-9 h-9" src="https://flowbite.s3.amazonaws.com/blocks/marketing/avatars/karen-nelson.png" alt="profile picture">
+            <div class="space-y-0.5 font-medium dark:text-white text-left rtl:text-right ms-3">
+              <div>Sarah Chen</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">Content Manager at TechCorp</div>
+            </div>
+          </figcaption>
+        </figure>
+        <figure class="flex flex-col items-center justify-center p-8 text-center bg-white border-b border-gray-200 rounded-tr-lg dark:bg-gray-800 dark:border-gray-700">
+          <blockquote class="max-w-2xl mx-auto mb-4 text-gray-500 lg:mb-8 dark:text-gray-400">
+            <h3 class="text-lg font-medium text-gray-900 dark:text-white">"Lightning fast and beautiful"</h3>
+            <p class="my-4">"The performance is incredible. Our blog loads instantly and the Flowbite components look amazing on all devices. Highly recommended!"</p>
+          </blockquote>
+          <figcaption class="flex items-center justify-center">
+            <img class="rounded-full w-9 h-9" src="https://flowbite.s3.amazonaws.com/blocks/marketing/avatars/roberta-casas.png" alt="profile picture">
+            <div class="space-y-0.5 font-medium dark:text-white text-left rtl:text-right ms-3">
+              <div>Alex Rodriguez</div>
+              <div class="text-sm text-gray-500 dark:text-gray-400">Lead Developer at StartupXYZ</div>
+            </div>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
 
-			<div class="grid gap-8 lg:grid-cols-2">
-				<!-- Card Component -->
-				<div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-					<a href="#">
-						<img class="rounded-t-lg" src="https://flowbite.com/docs/images/blog/image-1.jpg" alt="" />
-					</a>
-					<div class="p-5">
-						<a href="#">
-							<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Noteworthy technology acquisitions 2021</h5>
-						</a>
-						<p class="mb-3 font-normal text-gray-700 dark:text-gray-400">Here are the biggest enterprise technology acquisitions of 2021 so far, in reverse chronological order.</p>
-						<a href="#" class="inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-							Read more
-							<svg class="rtl:rotate-180 w-3.5 h-3.5 ms-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 10">
-								<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1 5h12m0 0L9 1m4 4L9 9"/>
-							</svg>
-						</a>
-					</div>
-				</div>
+  <!-- CTA Section -->
+  <section class="bg-gray-50 dark:bg-gray-800">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
+      <div class="mx-auto max-w-screen-sm text-center">
+        <h2 class="mb-4 text-4xl tracking-tight font-extrabold leading-tight text-gray-900 dark:text-white">Start your blog today</h2>
+        <p class="mb-6 font-light text-gray-500 dark:text-gray-400 md:text-lg">Try our platform free for 30 days. No credit card required.</p>
+        <a href="/blog" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">Get started</a>
+      </div>
+    </div>
+  </section>
 
-				<!-- Alert Component -->
-				<div class="space-y-4">
-					<div class="flex items-center p-4 mb-4 text-sm text-green-800 rounded-lg bg-green-50 dark:bg-gray-800 dark:text-green-400" role="alert">
-						<svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
-							<path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
-						</svg>
-						<span class="sr-only">Info</span>
-						<div>
-							<span class="font-medium">Success alert!</span> Astro, Flowbite, and Tailwind are working perfectly together.
-						</div>
-					</div>
-
-					<!-- Button Group -->
-					<div class="inline-flex rounded-md shadow-sm" role="group">
-						<button type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-s-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-							Profile
-						</button>
-						<button type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-							Settings
-						</button>
-						<button type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-e-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700 dark:bg-gray-800 dark:border-gray-700 dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:ring-blue-500 dark:focus:text-white">
-							Downloads
-						</button>
-					</div>
-				</div>
-			</div>
-
-			<!-- Modal Example -->
-			<div class="mt-8 text-center">
-				<button data-modal-target="default-modal" data-modal-toggle="default-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
-					Toggle modal
-				</button>
-			</div>
-
-			<!-- Main modal -->
-			<div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-				<div class="relative p-4 w-full max-w-2xl max-h-full">
-					<!-- Modal content -->
-					<div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
-						<!-- Modal header -->
-						<div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-							<h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-								Flowbite Modal
-							</h3>
-							<button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
-								<svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-									<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-								</svg>
-								<span class="sr-only">Close modal</span>
-							</button>
-						</div>
-						<!-- Modal body -->
-						<div class="p-4 md:p-5 space-y-4">
-							<p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-								This is a modal component from Flowbite working seamlessly with Astro and Tailwind CSS. You can use it to display important information, forms, or any other content that needs user attention.
-							</p>
-							<p class="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-								The modal includes proper accessibility attributes and can be easily customized with Tailwind classes.
-							</p>
-						</div>
-						<!-- Modal footer -->
-						<div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-							<button data-modal-hide="default-modal" type="button" class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">I accept</button>
-							<button data-modal-hide="default-modal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Decline</button>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-
-		<!-- Footer -->
-		<footer class="bg-white rounded-lg shadow dark:bg-gray-900 m-4">
-			<div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
-				<div class="sm:flex sm:items-center sm:justify-between">
-					<a href="/" class="flex items-center mb-4 sm:mb-0 space-x-3 rtl:space-x-reverse">
-						<span class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">Astro + Flowbite</span>
-					</a>
-					<ul class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400">
-						<li>
-							<a href="#" class="hover:underline me-4 md:me-6">About</a>
-						</li>
-						<li>
-							<a href="#" class="hover:underline me-4 md:me-6">Privacy Policy</a>
-						</li>
-						<li>
-							<a href="#" class="hover:underline me-4 md:me-6">Licensing</a>
-						</li>
-						<li>
-							<a href="#" class="hover:underline">Contact</a>
-						</li>
-					</ul>
-				</div>
-				<hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-				<span class="block text-sm text-gray-500 sm:text-center dark:text-gray-400">© 2024 <a href="/" class="hover:underline">Astro + Flowbite</a>. All Rights Reserved.</span>
-			</div>
-		</footer>
-	</main>
-</Layout>
+  <!-- Newsletter Signup -->
+  <section class="bg-white dark:bg-gray-900">
+    <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+      <div class="mx-auto max-w-screen-md sm:text-center">
+        <h2 class="mb-4 text-3xl tracking-tight font-extrabold text-gray-900 sm:text-4xl dark:text-white">Sign up for our newsletter</h2>
+        <p class="mx-auto mb-8 max-w-2xl font-light text-gray-500 md:mb-12 sm:text-xl dark:text-gray-400">Stay up to date with the roadmap progress, announcements and exclusive discounts feel free to sign up with your email.</p>
+        <form action="#">
+          <div class="items-center mx-auto mb-3 space-y-4 max-w-screen-sm sm:flex sm:space-y-0">
+            <div class="relative w-full">
+              <label for="email" class="hidden mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Email address</label>
+              <div class="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+                <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                </svg>
+              </div>
+              <input class="block p-3 pl-10 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 sm:rounded-none sm:rounded-l-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Enter your email" type="email" id="email" required="">
+            </div>
+            <div>
+              <button type="submit" class="py-3 px-5 w-full text-sm font-medium text-center text-white rounded-lg border cursor-pointer bg-blue-700 border-blue-600 sm:rounded-none sm:rounded-r-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Subscribe</button>
+            </div>
+          </div>
+          <div class="mx-auto max-w-screen-sm text-sm text-left text-gray-500 newsletter-form-footer dark:text-gray-300">We care about the protection of your data. <a href="#" class="font-medium text-blue-600 dark:text-blue-500 hover:underline">Read our Privacy Policy</a>.</div>
+        </form>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
